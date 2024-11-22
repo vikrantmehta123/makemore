@@ -38,6 +38,7 @@ g = torch.Generator().manual_seed(2147483647)
 P = (N).float()
 P /= P.sum(dim=1, keepdim=True)
 
+print("Generating names by probability sampling: ")
 for i in range(5):
     idx = 0
     out = []
@@ -53,3 +54,56 @@ for i in range(5):
     print("".join(out))
 
 # Evaluating Model Performance and Building a Loss Function
+
+# Think:
+# What does the P[i, j] entry mean?
+# P[i, j] is the predicted probability that the j'th character appears after i'th character
+# For each bigram, P[i, j] represents the "predicted probability"
+# For all instances of the training data, you'd want this probab to be close to 1.
+# You can use likelihood here-> likelihood is the product of the predicted probabs. You want to maximize this.
+
+# GOAL: maximize likelihood of the data w.r.t. model parameters (statistical modeling)
+# equivalent to maximizing the log likelihood (because log is monotonic)
+# equivalent to minimizing the negative log likelihood
+# equivalent to minimizing the average negative log likelihood
+# log(a*b*c) = log(a) + log(b) + log(c)
+
+# Computing Loss
+log_likelihood = 0.0 
+n = 0
+
+for w in words:
+    chs = ['.'] + list(w) + ['.']
+    for ch1, ch2 in zip(chs, chs[1:]):
+        ix1, ix2 = stoi[ch1], stoi[ch2]
+
+        probab = P[ix1, ix2]
+        logprobab = torch.log(probab)
+
+        log_likelihood += logprobab # You add because you've taken log
+        n += 1
+
+nll = -log_likelihood
+print(f"Average Negative Log Likelihood is:{nll/n}")
+
+# Creating the training dataset for neural network
+xs, ys = [], []
+
+for w in words:
+    chs = ['.'] + list(w) + ['.']
+    for ch1, ch2 in zip(chs, chs[1:]):
+        ix1, ix2 = stoi[ch1], stoi[ch2]
+
+        # For each bigram, the first character is the 'x' and the second is it's 'label'
+        xs.append(ix1)
+        ys.append(ix2)
+
+xs = torch.tensor(xs)
+ys = torch.tensor(ys)
+
+# Build the Neural Network
+import torch.nn.functional as F
+
+x_encoded = F.one_hot(xs, num_classes=27).float()
+
+W = torch.randn((27, 27))
