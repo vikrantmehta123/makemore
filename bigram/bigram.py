@@ -106,4 +106,9 @@ import torch.nn.functional as F
 
 x_encoded = F.one_hot(xs, num_classes=27).float()
 
-W = torch.randn((27, 27))
+W = torch.randn((27, 27), generator=g)
+
+logits = (x_encoded @ W )
+counts = logits.exp()
+probabs = counts / counts.sum(dim=1, keepdim=True)
+
