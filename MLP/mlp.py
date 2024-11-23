@@ -86,14 +86,17 @@ for p in parameters:
 epochs = 10
 
 for i in range(epochs):
+    # Construct mini batch 
+    ix = torch.randint(0, X.shape[0], (32, )) # Batch of 32
+
     # Forward pass
-    embedding = C[X]
+    embedding = C[X[ix]]
 
     # Matrix multiplication with the embedding. You need .view to fit matmul
     h = torch.tanh(embedding.view(-1, 6) @  W1 + b1)
     logits = h @ W2 + b2
 
-    loss = F.cross_entropy(logits, Y)
+    loss = F.cross_entropy(logits, Y[ix])
     print(loss.item())
     # Backward pass
     for p in parameters:
@@ -101,6 +104,6 @@ for i in range(epochs):
     
     loss.backward()
     for p in parameters:
-        p.data -= 0.01 * p.grad
+        p.data -= 0.11 * p.grad
 
 print(loss.item())
