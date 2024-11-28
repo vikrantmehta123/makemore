@@ -3,7 +3,7 @@ import torch.nn.functional as F
 import matplotlib.pyplot as plt
 
 # Fetch data
-words = open('names.txt', 'r').read().splitlines()
+words = open(r'../names.txt', 'r').read().splitlines()
 
 # Create integer to character, and character to integer mapping
 chars = sorted(list(set(''.join(words))))
